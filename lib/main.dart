@@ -5,10 +5,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gpu/gpu.dart' as gpu;
 
 const String _kShaderBundlePath =
-    'build/shaderbundles/my_renderer.shaderbundle';
+    'build/shaderbundles/my_first_triangle.shaderbundle';
 
 gpu.ShaderLibrary? _shaderLibrary;
 
@@ -22,32 +23,91 @@ gpu.ShaderLibrary get shaderLibrary {
 }
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const MaterialApp(
+      title: 'Flutter GPU Triangle Demo',
+      debugShowCheckedModeBanner: false,
+      home: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Color _backgroundColor = const Color.fromARGB(255, 41, 92, 117);
+  Color _foregroundColor = const Color.fromARGB(255, 211, 91, 5);
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter GPU Triangle Demo',
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          actions: [
-            TextButton(
-              onPressed: () {},
-              child: const Text('Foreground'),
-            ),
-            TextButton(
-              onPressed: () {},
-              child: const Text('Background'),
-            ),
-          ],
-        ),
-        body: CustomPaint(
-          painter: TrianglePainter(),
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog.adaptive(
+                  title: const Text('Select Foreground Color'),
+                  content: SingleChildScrollView(
+                    child: SlidePicker(
+                      pickerColor: _foregroundColor,
+                      onColorChanged: (pickedColor) {
+                        setState(() {
+                          _foregroundColor = pickedColor;
+                        });
+                      },
+                      colorModel: ColorModel.rgb,
+                      enableAlpha: false,
+                      displayThumbColor: true,
+                      showParams: true,
+                      showIndicator: true,
+                    ),
+                  ),
+                ),
+              );
+            },
+            child: const Text('Foreground'),
+          ),
+          TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog.adaptive(
+                  title: const Text('Select Background Color'),
+                  content: SingleChildScrollView(
+                    child: SlidePicker(
+                      pickerColor: _backgroundColor,
+                      onColorChanged: (pickedColor) {
+                        setState(() {
+                          _backgroundColor = pickedColor;
+                        });
+                      },
+                      colorModel: ColorModel.rgb,
+                      enableAlpha: false,
+                      displayThumbColor: true,
+                      showParams: true,
+                      showIndicator: true,
+                    ),
+                  ),
+                ),
+              );
+            },
+            child: const Text('Background'),
+          ),
+        ],
+      ),
+      body: SizedBox.expand(
+        child: CustomPaint(
+          painter: TrianglePainter(
+            foregroundColor: _foregroundColor,
+            backgroundColor: _backgroundColor,
+          ),
         ),
       ),
     );
@@ -55,8 +115,17 @@ class MyApp extends StatelessWidget {
 }
 
 class TrianglePainter extends CustomPainter {
+  const TrianglePainter({
+    required this.foregroundColor,
+    required this.backgroundColor,
+  });
+  final Color foregroundColor;
+  final Color backgroundColor;
+
   @override
   void paint(Canvas canvas, Size size) {
+    debugPrint('Painting triangle, size: $size');
+
     final texture = gpu.gpuContext.createTexture(
         gpu.StorageMode.devicePrivate, size.width.ceil(), size.height.ceil());
     if (texture == null) {
@@ -66,7 +135,7 @@ class TrianglePainter extends CustomPainter {
     final renderTarget = gpu.RenderTarget.singleColor(
       gpu.ColorAttachment(
         texture: texture,
-        clearValue: const Color.fromARGB(255, 54, 131, 169),
+        clearValue: backgroundColor,
         loadAction: gpu.LoadAction.clear,
         storeAction: gpu.StoreAction.store,
       ),
@@ -103,8 +172,10 @@ class TrianglePainter extends CustomPainter {
 
     final colorBuffer = gpu.gpuContext
         .createDeviceBufferWithCopy(ByteData.sublistView(Float32List.fromList([
-      // r,g,b,a
-      0.8, 0.0, 0.8, 1.0,
+      foregroundColor.red / 255.0,
+      foregroundColor.green / 255.0,
+      foregroundColor.blue / 255.0,
+      1.0,
     ])));
     if (colorBuffer == null) {
       throw Exception('Failed to create color buffer');
