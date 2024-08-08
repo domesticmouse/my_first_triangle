@@ -41,85 +41,87 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Color _backgroundColor = const Color.fromARGB(255, 41, 92, 117);
-  Color _foregroundColor = const Color.fromARGB(255, 211, 91, 5);
+  Color _color1 = const Color.fromARGB(255, 255, 0, 0);
+  Color _color2 = const Color.fromARGB(255, 0, 255, 0);
+  Color _color3 = const Color.fromARGB(255, 0, 0, 255);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          TextButton(
-            onPressed: () => showDialog(
-              context: context,
-              builder: (context) => Dialog(
-                child: SingleChildScrollView(
-                  child: SlidePicker(
-                    pickerColor: _foregroundColor,
-                    onColorChanged: (pickedColor) {
-                      setState(() {
-                        _foregroundColor = pickedColor;
-                      });
-                    },
-                    colorModel: ColorModel.rgb,
-                    enableAlpha: false,
-                    displayThumbColor: false,
-                    showParams: false,
-                    indicatorBorderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(25.0),
-                      topRight: Radius.circular(25.0),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            child: const Text('Foreground'),
-          ),
-          TextButton(
-            onPressed: () => showDialog(
-              context: context,
-              builder: (context) => Dialog(
-                child: SingleChildScrollView(
-                  child: SlidePicker(
-                    pickerColor: _backgroundColor,
-                    onColorChanged: (pickedColor) {
-                      setState(() {
-                        _backgroundColor = pickedColor;
-                      });
-                    },
-                    colorModel: ColorModel.rgb,
-                    enableAlpha: false,
-                    displayThumbColor: false,
-                    showParams: false,
-                    indicatorBorderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(25.0),
-                      topRight: Radius.circular(25.0),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            child: const Text('Background'),
-          ),
+          _buildVertexColorButton('Vert1', _color1, (pickedColor) {
+            setState(() {
+              _color1 = pickedColor;
+            });
+          }),
+          _buildVertexColorButton('Vert2', _color2, (pickedColor) {
+            setState(() {
+              _color2 = pickedColor;
+            });
+          }),
+          _buildVertexColorButton('Vert3', _color3, (pickedColor) {
+            setState(() {
+              _color3 = pickedColor;
+            });
+          }),
+          _buildVertexColorButton('Background', _backgroundColor, (pickedColor) {
+            setState(() {
+              _backgroundColor = pickedColor;
+            });
+          }),
         ],
       ),
       body: SizedBox.expand(
         child: CustomPaint(
           painter: TrianglePainter(
-            foregroundColor: _foregroundColor,
+            color1: _color1,
+            color2: _color2,
+            color3: _color3,
             backgroundColor: _backgroundColor,
           ),
         ),
       ),
     );
   }
+
+  _buildVertexColorButton(
+      String name, Color color, Function(Color color) onUpdate) {
+    return TextButton(
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          child: SingleChildScrollView(
+            child: SlidePicker(
+              pickerColor: color,
+              onColorChanged: onUpdate,
+              colorModel: ColorModel.rgb,
+              enableAlpha: false,
+              displayThumbColor: false,
+              showParams: false,
+              indicatorBorderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(25.0),
+                topRight: Radius.circular(25.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+      child: Text(name),
+    );
+  }
 }
 
 class TrianglePainter extends CustomPainter {
   const TrianglePainter({
-    required this.foregroundColor,
+    required this.color1,
+    required this.color2,
+    required this.color3,
     required this.backgroundColor,
   });
-  final Color foregroundColor;
+  final Color color1;
+  final Color color2;
+  final Color color3;
   final Color backgroundColor;
 
   @override
@@ -159,26 +161,23 @@ class TrianglePainter extends CustomPainter {
     final verticesDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
       ByteData.sublistView(
         Float32List.fromList([
-          // x, y
+          // layout:
+          //   x, y
+          //   vertex color (r,g,b,a)
           -0.5, -0.5, // First vertex
+          color1.red / 255, color1.green / 255, color1.blue / 255,
+          color1.alpha / 255, // vertex color
           0.5, -0.5, // Second vertex
+          color2.red / 255, color2.green / 255, color2.blue / 255,
+          color2.alpha / 255, // vertex color
           0.0, 0.5, // Third vertex
+          color3.red / 255, color3.green / 255, color3.blue / 255,
+          color3.alpha / 255, // vertex color
         ]),
       ),
     );
     if (verticesDeviceBuffer == null) {
       throw Exception('Failed to create device buffer');
-    }
-
-    final colorBuffer = gpu.gpuContext
-        .createDeviceBufferWithCopy(ByteData.sublistView(Float32List.fromList([
-      foregroundColor.red / 255.0,
-      foregroundColor.green / 255.0,
-      foregroundColor.blue / 255.0,
-      1.0,
-    ])));
-    if (colorBuffer == null) {
-      throw Exception('Failed to create color buffer');
     }
 
     renderPass.bindPipeline(pipeline);
@@ -189,13 +188,6 @@ class TrianglePainter extends CustomPainter {
       lengthInBytes: verticesDeviceBuffer.sizeInBytes,
     );
     renderPass.bindVertexBuffer(verticesView, 3);
-
-    final colorView = gpu.BufferView(
-      colorBuffer,
-      offsetInBytes: 0,
-      lengthInBytes: colorBuffer.sizeInBytes,
-    );
-    renderPass.bindUniform(frag.getUniformSlot('FragInfo'), colorView);
 
     renderPass.draw();
 
