@@ -49,55 +49,55 @@ class _MyAppState extends State<MyApp> {
       appBar: AppBar(
         actions: [
           TextButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog.adaptive(
-                  title: const Text('Select Foreground Color'),
-                  content: SingleChildScrollView(
-                    child: SlidePicker(
-                      pickerColor: _foregroundColor,
-                      onColorChanged: (pickedColor) {
-                        setState(() {
-                          _foregroundColor = pickedColor;
-                        });
-                      },
-                      colorModel: ColorModel.rgb,
-                      enableAlpha: false,
-                      displayThumbColor: true,
-                      showParams: true,
-                      showIndicator: true,
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => Dialog(
+                child: SingleChildScrollView(
+                  child: SlidePicker(
+                    pickerColor: _foregroundColor,
+                    onColorChanged: (pickedColor) {
+                      setState(() {
+                        _foregroundColor = pickedColor;
+                      });
+                    },
+                    colorModel: ColorModel.rgb,
+                    enableAlpha: false,
+                    displayThumbColor: false,
+                    showParams: false,
+                    indicatorBorderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(25.0),
+                      topRight: Radius.circular(25.0),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+            ),
             child: const Text('Foreground'),
           ),
           TextButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog.adaptive(
-                  title: const Text('Select Background Color'),
-                  content: SingleChildScrollView(
-                    child: SlidePicker(
-                      pickerColor: _backgroundColor,
-                      onColorChanged: (pickedColor) {
-                        setState(() {
-                          _backgroundColor = pickedColor;
-                        });
-                      },
-                      colorModel: ColorModel.rgb,
-                      enableAlpha: false,
-                      displayThumbColor: true,
-                      showParams: true,
-                      showIndicator: true,
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => Dialog(
+                child: SingleChildScrollView(
+                  child: SlidePicker(
+                    pickerColor: _backgroundColor,
+                    onColorChanged: (pickedColor) {
+                      setState(() {
+                        _backgroundColor = pickedColor;
+                      });
+                    },
+                    colorModel: ColorModel.rgb,
+                    enableAlpha: false,
+                    displayThumbColor: false,
+                    showParams: false,
+                    indicatorBorderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(25.0),
+                      topRight: Radius.circular(25.0),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+            ),
             child: const Text('Background'),
           ),
         ],
