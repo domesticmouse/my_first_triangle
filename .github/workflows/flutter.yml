@@ -30,4 +30,4 @@ jobs:
       - name: dart fix
         run: dart fix --dry-run
       - name: Run tests
-        run: flutter test
+        run: flutter test --enable-impeller
