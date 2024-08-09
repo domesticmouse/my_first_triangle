@@ -17,6 +17,8 @@ jobs:
         with:
           channel: master      
       - run: flutter pub get
+      - name: Force building of assets directories
+        run: flutter build web
       - name: Lint analysis
         run: dart analyze
       - name: Dart format
