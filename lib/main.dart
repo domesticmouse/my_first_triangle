@@ -65,7 +65,8 @@ class _MyAppState extends State<MyApp> {
               _color3 = pickedColor;
             });
           }),
-          _buildVertexColorButton('Background', _backgroundColor, (pickedColor) {
+          _buildVertexColorButton('Background', _backgroundColor,
+              (pickedColor) {
             setState(() {
               _backgroundColor = pickedColor;
             });
