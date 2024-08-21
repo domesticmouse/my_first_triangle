@@ -103,10 +103,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_gpu_shaders
-      sha256: "757b3d3261f27a0bc241d899ac0b9a93c09c48fc1a0c9c78aa5dc99dd39dd0fe"
+      sha256: "5f7d1c2ef7b0124c09b4cbbe71e2b483b706d064c21fbb46d2882702a3667b83"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   flutter_lints:
     dependency: "direct dev"
     description:
