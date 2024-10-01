@@ -5,9 +5,9 @@
 #version 460 core
 
 in vec2 position;
-in vec4 color;
+in vec2 uv;
 
-out vec4 vertex_color;
+out vec2 vertex_uv;
 
 uniform VertInfo {
   mat4 model;
@@ -17,5 +17,5 @@ uniform VertInfo {
 
 void main() {
   gl_Position = projection * view * model * vec4(position, 0.0, 1.0);
-  vertex_color = color;
+  vertex_uv = uv;
 }

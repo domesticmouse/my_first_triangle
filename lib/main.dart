@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gpu/gpu.dart' as gpu;
 import 'package:vector_math/vector_math.dart' as vm;
 
@@ -41,152 +40,78 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
-  Color _backgroundColor = const Color.fromARGB(255, 40, 80, 110);
-  Color _color1 = const Color.fromARGB(255, 255, 50, 50);
-  Color _color2 = const Color.fromARGB(255, 50, 255, 50);
-  Color _color3 = const Color.fromARGB(255, 50, 50, 255);
-  Color _color4 = const Color.fromARGB(255, 50, 255, 255);
+class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
+  final Color _backgroundColor = Colors.black;
   double _angle = 0.0;
+  double _progress = 0.0;
 
-  late AnimationController _controller;
-  late Animation<double> _animation;
+  late AnimationController _angleController;
+  late Animation<double> _angleAnimation;
+  late AnimationController _progressController;
+  late Animation<double> _progressAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 30),
+    _angleController = AnimationController(
+      duration: const Duration(seconds: 15),
       vsync: this,
     )..repeat();
-    _animation =
-        Tween<double>(begin: 0.0, end: 8 * math.pi).animate(_controller)
+    _angleAnimation =
+        Tween<double>(begin: 0.0, end: 2 * math.pi).animate(_angleController)
           ..addListener(
             () {
               setState(() {
-                _angle = _animation.value;
+                _angle = _angleAnimation.value;
               });
             },
           );
+
+    _progressController =
+        AnimationController(duration: const Duration(seconds: 30), vsync: this)
+          ..repeat(reverse: true);
+    final Animation<double> curve =
+        CurvedAnimation(parent: _progressController, curve: Curves.easeInOut);
+    _progressAnimation = Tween(begin: 0.0, end: 100.0).animate(curve)
+      ..addListener(() {
+        setState(() {
+          _progress = _progressAnimation.value;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _angleController.dispose();
+    _progressController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building with angle $_angle');
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          VertexColorButton(
-              name: 'TL Vertex',
-              color: _color1,
-              onUpdate: (pickedColor) {
-                setState(() {
-                  _color1 = pickedColor;
-                });
-              }),
-          VertexColorButton(
-              name: 'TR Vertex',
-              color: _color2,
-              onUpdate: (pickedColor) {
-                setState(() {
-                  _color2 = pickedColor;
-                });
-              }),
-          VertexColorButton(
-              name: 'BL Vertex',
-              color: _color3,
-              onUpdate: (pickedColor) {
-                setState(() {
-                  _color3 = pickedColor;
-                });
-              }),
-          VertexColorButton(
-              name: 'BR Vertex',
-              color: _color4,
-              onUpdate: (pickedColor) {
-                setState(() {
-                  _color4 = pickedColor;
-                });
-              }),
-          VertexColorButton(
-              name: 'Background',
-              color: _backgroundColor,
-              onUpdate: (pickedColor) {
-                setState(() {
-                  _backgroundColor = pickedColor;
-                });
-              }),
-        ],
-      ),
       body: SizedBox.expand(
         child: CustomPaint(
           painter: TrianglePainter(
-            color1: _color1,
-            color2: _color2,
-            color3: _color3,
-            color4: _color4,
             backgroundColor: _backgroundColor,
             angle: _angle,
+            progress: _progress,
           ),
         ),
       ),
-    );
-  }
-}
-
-class VertexColorButton extends StatelessWidget {
-  const VertexColorButton({
-    super.key,
-    required this.name,
-    required this.color,
-    required this.onUpdate,
-  });
-  final String name;
-  final Color color;
-  final Function(Color color) onUpdate;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () => showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          child: SingleChildScrollView(
-            child: SlidePicker(
-              pickerColor: color,
-              onColorChanged: onUpdate,
-              colorModel: ColorModel.rgb,
-              enableAlpha: false,
-              displayThumbColor: false,
-              showParams: false,
-              indicatorBorderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(25.0),
-                topRight: Radius.circular(25.0),
-              ),
-            ),
-          ),
-        ),
-      ),
-      child: Text(name),
     );
   }
 }
 
 class TrianglePainter extends CustomPainter {
   const TrianglePainter({
-    required this.color1,
-    required this.color2,
-    required this.color3,
-    required this.color4,
     required this.backgroundColor,
     required this.angle,
+    required this.progress,
   });
-  final Color color1;
-  final Color color2;
-  final Color color3;
-  final Color color4;
   final Color backgroundColor;
   final double angle;
+  final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -219,28 +144,28 @@ class TrianglePainter extends CustomPainter {
     }
 
     final pipeline = gpu.gpuContext.createRenderPipeline(vert, frag);
-    const floatsPerVertex = 6;
-    final offset = 0.6;
-    final vertexList = [
-      // layout: x, y, r, g, b, a
+    const floatsPerVertex = 4;
+    final offset = 0.8;
+    final vertexList = <double>[
+      // layout: x, y, u, v
 
       // Triangle #1
 
       // Bottom left vertex
-      -offset, -offset, color3.r, color3.g, color3.b, color3.a,
+      -offset, -offset, -1, -1,
       // Bottom right vertex
-      offset, -offset, color4.r, color4.g, color4.b, color4.a,
+      offset, -offset, 1, -1,
       // Top left vertex
-      -offset, offset, color1.r, color1.g, color1.b, color1.a,
+      -offset, offset, -1, 1,
 
       // Triangle #2
 
       // Bottom right vertex
-      offset, -offset, color4.r, color4.g, color4.b, color4.a,
+      offset, -offset, 1, -1,
       // Top right vertex
-      offset, offset, color2.r, color2.g, color2.b, color2.a,
+      offset, offset, 1, 1,
       // Top left vertex
-      -offset, offset, color1.r, color1.g, color1.b, color1.a,
+      -offset, offset, -1, 1,
     ];
     final verticesDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
       ByteData.sublistView(Float32List.fromList(vertexList)),
@@ -249,19 +174,26 @@ class TrianglePainter extends CustomPainter {
       throw Exception('Failed to create vertices device buffer');
     }
 
-    final model =
-        vm.Matrix4.rotationY(angle).multiplied(vm.Matrix4.rotationX(angle / 2));
+    final model = vm.Matrix4.rotationY(angle);
     final view = vm.Matrix4.translation(vm.Vector3(0.0, 0.0, -2.0));
     final projection =
         vm.makePerspectiveMatrix(vm.radians(45), size.aspectRatio, 0.1, 100);
-    final uniforms = [model, view, projection];
+    final vertUniforms = [model, view, projection];
 
-    final uniformsDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
-        ByteData.sublistView(
-            Float32List.fromList(uniforms.expand((m) => m.storage).toList())));
+    final vertUniformsDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
+        ByteData.sublistView(Float32List.fromList(
+            vertUniforms.expand((m) => m.storage).toList())));
 
-    if (uniformsDeviceBuffer == null) {
-      throw Exception('Failed to create uniforms device buffer');
+    if (vertUniformsDeviceBuffer == null) {
+      throw Exception('Failed to create vert uniforms device buffer');
+    }
+
+    final fragUniforms = [progress];
+    final fragUniformsDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
+        ByteData.sublistView(Float32List.fromList(fragUniforms)));
+
+    if (fragUniformsDeviceBuffer == null) {
+      throw Exception('Failed to create frag uniforms device buffer');
     }
 
     renderPass.bindPipeline(pipeline);
@@ -274,13 +206,21 @@ class TrianglePainter extends CustomPainter {
     renderPass.bindVertexBuffer(
         verticesView, vertexList.length ~/ floatsPerVertex);
 
-    final uniformsView = gpu.BufferView(
-      uniformsDeviceBuffer,
+    final vertUniformsView = gpu.BufferView(
+      vertUniformsDeviceBuffer,
       offsetInBytes: 0,
-      lengthInBytes: uniformsDeviceBuffer.sizeInBytes,
+      lengthInBytes: vertUniformsDeviceBuffer.sizeInBytes,
     );
 
-    renderPass.bindUniform(vert.getUniformSlot('VertInfo'), uniformsView);
+    renderPass.bindUniform(vert.getUniformSlot('VertInfo'), vertUniformsView);
+
+    final fragUniformsView = gpu.BufferView(
+      fragUniformsDeviceBuffer,
+      offsetInBytes: 0,
+      lengthInBytes: fragUniformsDeviceBuffer.sizeInBytes,
+    );
+
+    renderPass.bindUniform(frag.getUniformSlot('FragInfo'), fragUniformsView);
 
     renderPass.draw();
 
