@@ -41,29 +41,35 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Color _backgroundColor = const Color.fromARGB(255, 41, 92, 117);
-  Color _color1 = const Color.fromARGB(255, 255, 0, 0);
-  Color _color2 = const Color.fromARGB(255, 0, 255, 0);
-  Color _color3 = const Color.fromARGB(255, 0, 0, 255);
+  Color _backgroundColor = const Color.fromARGB(255, 40, 80, 110);
+  Color _color1 = const Color.fromARGB(255, 255, 50, 50);
+  Color _color2 = const Color.fromARGB(255, 50, 255, 50);
+  Color _color3 = const Color.fromARGB(255, 50, 50, 255);
+  Color _color4 = const Color.fromARGB(255, 50, 255, 255);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          _buildVertexColorButton('Vert1', _color1, (pickedColor) {
+          _buildVertexColorButton('TL Vertex', _color1, (pickedColor) {
             setState(() {
               _color1 = pickedColor;
             });
           }),
-          _buildVertexColorButton('Vert2', _color2, (pickedColor) {
+          _buildVertexColorButton('TR Vertex', _color2, (pickedColor) {
             setState(() {
               _color2 = pickedColor;
             });
           }),
-          _buildVertexColorButton('Vert3', _color3, (pickedColor) {
+          _buildVertexColorButton('BL Vertex', _color3, (pickedColor) {
             setState(() {
               _color3 = pickedColor;
+            });
+          }),
+          _buildVertexColorButton('BR Vertex', _color4, (pickedColor) {
+            setState(() {
+              _color4 = pickedColor;
             });
           }),
           _buildVertexColorButton('Background', _backgroundColor,
@@ -80,6 +86,7 @@ class _MyAppState extends State<MyApp> {
             color1: _color1,
             color2: _color2,
             color3: _color3,
+            color4: _color4,
             backgroundColor: _backgroundColor,
           ),
         ),
@@ -119,11 +126,13 @@ class TrianglePainter extends CustomPainter {
     required this.color1,
     required this.color2,
     required this.color3,
+    required this.color4,
     required this.backgroundColor,
   });
   final Color color1;
   final Color color2;
   final Color color3;
+  final Color color4;
   final Color backgroundColor;
 
   @override
@@ -159,25 +168,25 @@ class TrianglePainter extends CustomPainter {
     final pipeline = gpu.gpuContext.createRenderPipeline(vert, frag);
     const floatsPerVertex = 6;
     final vertexList = [
-      // layout:
-      //   x, y
-      //   vertex color (r,g,b,a)
+      // layout: x, y, r, g, b, a
 
       // Triangle #1
-      -0.5, -0.5, // First vertex
-      color1.r, color1.g, color1.b, color1.a, // vertex color
-      0.5, -0.5, // Second vertex
-      color2.r, color2.g, color2.b, color2.a, // vertex color
-      -0.5, 0.5, // Third vertex
-      color3.r, color3.g, color3.b, color3.a, // vertex color
+
+      // Bottom left vertex
+      -0.75, -0.75, color3.r, color3.g, color3.b, color3.a,
+      // Bottom right vertex
+      0.75, -0.75, color4.r, color4.g, color4.b, color4.a,
+      // Top left vertex
+      -0.75, 0.75, color1.r, color1.g, color1.b, color1.a,
 
       // Triangle #2
-      0.5, -0.5, // Shared vertex
-      color2.r, color2.g, color2.b, color2.a, // vertex color
-      0.5, 0.5, // Not shared vertex
-      color1.r, color1.g, color1.b, color1.a, // vertex color
-      -0.5, 0.5, // Shared vertex
-      color3.r, color3.g, color3.b, color3.a, // vertex color
+
+      // Bottom right vertex
+      0.75, -0.75, color4.r, color4.g, color4.b, color4.a,
+      // Top right vertex
+      0.75, 0.75, color2.r, color2.g, color2.b, color2.a,
+      // Top left vertex
+      -0.75, 0.75, color1.r, color1.g, color1.b, color1.a,
     ];
     final verticesDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
       ByteData.sublistView(Float32List.fromList(vertexList)),
