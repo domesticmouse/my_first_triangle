@@ -16,6 +16,7 @@ dependencies:
   native_assets_cli: ^0.7.2
   xml: ^6.5.0
   flutter_colorpicker: ^1.1.0
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:

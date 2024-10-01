@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gpu/gpu.dart' as gpu;
+import 'package:vector_math/vector_math.dart' as vm;
 
 const String _kShaderBundlePath =
     'build/shaderbundles/my_first_triangle.shaderbundle';
@@ -136,7 +137,7 @@ class TrianglePainter extends CustomPainter {
     final renderTarget = gpu.RenderTarget.singleColor(
       gpu.ColorAttachment(
         texture: texture,
-        clearValue: backgroundColor,
+        clearValue: backgroundColor.vec4,
         loadAction: gpu.LoadAction.clear,
         storeAction: gpu.StoreAction.store,
       ),
@@ -164,25 +165,19 @@ class TrianglePainter extends CustomPainter {
 
       // Triangle #1
       -0.5, -0.5, // First vertex
-      color1.red / 255, color1.green / 255, color1.blue / 255,
-      color1.alpha / 255, // vertex color
+      color1.r, color1.g, color1.b, color1.a, // vertex color
       0.5, -0.5, // Second vertex
-      color2.red / 255, color2.green / 255, color2.blue / 255,
-      color2.alpha / 255, // vertex color
+      color2.r, color2.g, color2.b, color2.a, // vertex color
       -0.5, 0.5, // Third vertex
-      color3.red / 255, color3.green / 255, color3.blue / 255,
-      color3.alpha / 255, // vertex color
+      color3.r, color3.g, color3.b, color3.a, // vertex color
 
       // Triangle #2
       0.5, -0.5, // Shared vertex
-      color2.red / 255, color2.green / 255, color2.blue / 255,
-      color2.alpha / 255, // vertex color
+      color2.r, color2.g, color2.b, color2.a, // vertex color
       0.5, 0.5, // Not shared vertex
-      color1.red / 255, color1.green / 255, color1.blue / 255,
-      color1.alpha / 255, // vertex color
+      color1.r, color1.g, color1.b, color1.a, // vertex color
       -0.5, 0.5, // Shared vertex
-      color3.red / 255, color3.green / 255, color3.blue / 255,
-      color3.alpha / 255, // vertex color
+      color3.r, color3.g, color3.b, color3.a, // vertex color
     ];
     final verticesDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
       ByteData.sublistView(Float32List.fromList(vertexList)),
@@ -210,4 +205,8 @@ class TrianglePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+extension _ToVec4 on Color {
+  vm.Vector4 get vec4 => vm.Vector4(r, g, b, a);
 }
