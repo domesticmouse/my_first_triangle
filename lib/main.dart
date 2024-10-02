@@ -121,14 +121,8 @@ class TrianglePainter extends CustomPainter {
       throw Exception('Failed to create texture');
     }
 
-    final renderTarget = gpu.RenderTarget.singleColor(
-      gpu.ColorAttachment(
-        texture: texture,
-        clearValue: backgroundColor.vec4,
-        loadAction: gpu.LoadAction.clear,
-        storeAction: gpu.StoreAction.store,
-      ),
-    );
+    final renderTarget = gpu.RenderTarget.singleColor(gpu.ColorAttachment(
+        texture: texture, clearValue: backgroundColor.vec4));
 
     final commandBuffer = gpu.gpuContext.createCommandBuffer();
     final renderPass = commandBuffer.createRenderPass(renderTarget);
