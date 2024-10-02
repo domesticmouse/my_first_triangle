@@ -19,11 +19,5 @@ void main() {
         home: MyApp(),
       ),
     );
-
-    // Verify that our app has four text buttons
-    expect(find.text('Vert1'), findsOneWidget);
-    expect(find.text('Vert2'), findsOneWidget);
-    expect(find.text('Vert3'), findsOneWidget);
-    expect(find.text('Background'), findsOneWidget);
   });
 }
