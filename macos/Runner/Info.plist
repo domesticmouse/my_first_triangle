@@ -30,6 +30,6 @@
 	<string>NSApplication</string>
 	<!-- flutter_gpu requires Impeller -->
 	<key>FLTEnableImpeller</key>
-	<true />	
+	<true />
 </dict>
 </plist>
