@@ -139,27 +139,18 @@ class TrianglePainter extends CustomPainter {
 
     final pipeline = gpu.gpuContext.createRenderPipeline(vert, frag);
     const floatsPerVertex = 4;
-    final offset = 0.8;
     final vertexList = <double>[
       // layout: x, y, u, v
 
       // Triangle #1
-
-      // Bottom left vertex
-      -offset, -offset, -1, -1,
-      // Bottom right vertex
-      offset, -offset, 1, -1,
-      // Top left vertex
-      -offset, offset, -1, 1,
+      -0.8, -0.8, -1, -1,
+      0.8, -0.8, 1, -1,
+      -0.8, 0.8, -1, 1,
 
       // Triangle #2
-
-      // Bottom right vertex
-      offset, -offset, 1, -1,
-      // Top right vertex
-      offset, offset, 1, 1,
-      // Top left vertex
-      -offset, offset, -1, 1,
+      0.8, -0.8, 1, -1,
+      0.8, 0.8, 1, 1,
+      -0.8, 0.8, -1, 1,
     ];
     final verticesDeviceBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
       ByteData.sublistView(Float32List.fromList(vertexList)),

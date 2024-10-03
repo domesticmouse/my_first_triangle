@@ -1,10 +1,10 @@
 {
     "SimpleVertex": {
         "type": "vertex",
-        "file": "shaders/simple.vert"
+        "file": "shaders/my_first_triangle.vert"
     },
     "SimpleFragment": {
         "type": "fragment",
-        "file": "shaders/simple.frag"
+        "file": "shaders/my_first_triangle.frag"
     }
 }
