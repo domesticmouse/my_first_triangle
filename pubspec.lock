@@ -268,10 +268,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_assets_cli
-      sha256: "1ff032c0ca050391c4c5107485f1a26e0e95cee18d1fdb2b7bdbb990efd3c188"
+      sha256: db902509468ec2a6c6d11fa9ce02805ede280e8dbfb5f0014ef3de8483cadfce
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.3"
+    version: "0.8.0"
   node_preamble:
     dependency: transitive
     description:
