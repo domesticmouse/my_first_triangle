@@ -14,10 +14,7 @@ void main() {
   testWidgets('Foud buttons smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(
-      const MaterialApp(
-        title: 'Flutter GPU Triangle test',
-        home: MyApp(),
-      ),
+      const MaterialApp(title: 'Flutter GPU Triangle test', home: MyApp()),
     );
   });
 }
