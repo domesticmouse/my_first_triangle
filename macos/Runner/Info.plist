@@ -29,7 +29,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<!-- flutter_gpu requires Impeller -->
-	<key>FLTEnableImpeller</key>
+	<key>FLTEnableFlutterGPU</key>
 	<true />
 </dict>
 </plist>
