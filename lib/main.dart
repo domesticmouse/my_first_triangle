@@ -57,14 +57,13 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
       duration: const Duration(seconds: 15),
       vsync: this,
     )..repeat();
-    _angleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 2 * math.pi,
-    ).animate(_angleController)..addListener(() {
-      setState(() {
-        _angle = _angleAnimation.value;
-      });
-    });
+    _angleAnimation =
+        Tween<double>(begin: 0.0, end: 2 * math.pi).animate(_angleController)
+          ..addListener(() {
+            setState(() {
+              _angle = _angleAnimation.value;
+            });
+          });
 
     _progressController = AnimationController(
       duration: const Duration(seconds: 30),
